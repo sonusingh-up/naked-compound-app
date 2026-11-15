@@ -29,7 +29,7 @@ function ftsQuery(question: string): string {
 }
 
 function conditions(filters: AskFilters): { sql: string; values: unknown[] } {
-  const where: string[] = ['p.has_review = 1', 'p.score IS NOT NULL'];
+  const where: string[] = ['p.score IS NOT NULL'];
   const values: unknown[] = [];
   if (filters.maxPrice !== undefined) { where.push('p.price_inr IS NOT NULL AND p.price_inr <= ?'); values.push(filters.maxPrice); }
   if (filters.category) { where.push('EXISTS (SELECT 1 FROM json_each(p.categories) WHERE value = ?)'); values.push(filters.category); }

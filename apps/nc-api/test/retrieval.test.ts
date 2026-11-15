@@ -29,7 +29,7 @@ describe('D1 and Vectorize retrieval', () => {
     const filters: AskFilters = { maxPrice: 3000, category: 'whey', flags: ['veg', 'fssai'] };
     const products: Product[] = await retrieveProducts({ db, ai, vectorize, question: 'whey', filters });
     expect(products.map(product => product.id)).toEqual(['fts-only', 'vector-only']);
-    expect(statements[0].sql).toContain('p.has_review = 1');
+    expect(statements[0].sql).not.toContain('p.has_review = 1');
     expect(statements[0].sql).toContain('p.score IS NOT NULL');
     expect(statements[0].sql).toContain('json_each(p.categories)');
     expect(statements[0].values).toEqual(['"whey"', 3000, 'whey']);

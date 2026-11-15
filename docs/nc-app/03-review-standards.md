@@ -11,6 +11,10 @@ The app reports Naked Compound's editorial work. It never replaces that work.
 
 Brand Review Program submissions enter at step 3 and are scored the same way. Payment never changes a score, rank or visibility. A paid product is marked "Brand-submitted" on its detail screen.
 
+## Review depth
+
+An NC score that is not null establishes reviewed status, including a score of zero. `has_review` indicates a full article only; it never gates catalog eligibility or score visibility. Scored products expose `review_depth: "full"` when `has_review` is true, otherwise `"scored"`. Cards show “Full review” or “NC score”; only full reviews expose the article URL and button. Products with a null score remain unreviewed.
+
 ## Editorial and data boundaries
 
 - Separate verified editorial fields from user-submitted or URL-parsed guesses. Label guesses as unverified; never promote them into a review claim.

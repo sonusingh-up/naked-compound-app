@@ -31,7 +31,7 @@ function sql(value) {
 }
 
 const statements = parsed.products.map(product => {
-  const reviewed = product.has_review && product.score !== null && product.score !== undefined;
+  const reviewed = product.score !== null && product.score !== undefined;
   const personallyTested = typeof product.personally_tested === 'boolean'
     ? product.personally_tested
     : Boolean(product.personally_tested && typeof product.personally_tested === 'object' && product.personally_tested.bought);
@@ -39,9 +39,9 @@ const statements = parsed.products.map(product => {
     product.id, product.brand, product.name, reviewed ? product.score : null, reviewed ? product.grade ?? null : null,
     reviewed ? product.summary ?? null : null, product.form ?? null, product.price_inr ?? null,
     product.quantity ?? null, null, JSON.stringify(product.categories), product.url ?? null,
-    reviewed ? 1 : 0, personallyTested ? 1 : 0, null, null, null, `dataset:${parsed._meta.version}`
+    product.has_review ? 1 : 0, personallyTested ? 1 : 0, null, null, null, `dataset:${parsed._meta.version}`
   ];
-  return `INSERT OR REPLACE INTO products (id, brand, name, score, grade, summary, form, price_inr, quantity, price_checked_at, categories, review_url, has_review, personally_tested, image_key, flags, cost_per_dose_inr, updated_at) VALUES (${row.map(sql).join(', ')});`;
+  return `INSERT INTO products (id, brand, name, score, grade, summary, form, price_inr, quantity, price_checked_at, categories, review_url, has_review, personally_tested, image_key, flags, cost_per_dose_inr, updated_at) VALUES (${row.map(sql).join(', ')}) ON CONFLICT(id) DO UPDATE SET brand=excluded.brand, name=excluded.name, score=excluded.score, grade=excluded.grade, summary=excluded.summary, form=excluded.form, price_inr=excluded.price_inr, quantity=excluded.quantity, categories=excluded.categories, review_url=excluded.review_url, has_review=excluded.has_review, personally_tested=excluded.personally_tested, updated_at=excluded.updated_at;`;
 });
 // Wrangler's D1 file importer manages atomicity; explicit SQL transactions are rejected remotely.
 await writeFile(output, `${statements.join('\n')}\n`, 'utf8');
