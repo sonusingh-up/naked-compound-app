@@ -20,9 +20,9 @@
 
 **Cloudflare accounts (confirmed 15 Nov 2026):**
 - **App account (new):** naked.business@yahoo.com, account ID `7353a845036995b406e2f7e9a5c99dba`. The Worker, D1, R2 and Vectorize live here.
-  - D1 `nc-app` created: `database_id = 7d55e074-0515-4303-9235-eb38e066dd33` (APAC).
-  - R2 bucket `nc-images` created (ENAM).
-  - Vectorize `nc-reviews`: create with `npx wrangler vectorize create nc-reviews --dimensions=<embed model dims> --metric=cosine`.
+  - **Production (unchanged):** Worker `nc-api`; D1 `nc-app`, `database_id = 7d55e074-0515-4303-9235-eb38e066dd33`; R2 bucket `nc-images`; Vectorize index `nc-reviews`.
+  - **Staging:** Worker `nc-api-staging`; D1 `nc-app-staging`, `database_id = 7d655f11-e7a8-4b5e-8e30-d209d1987664`; R2 bucket `nc-images-staging`; Vectorize index `nc-reviews-staging`.
+  - Wrangler environment bindings are defined in `apps/nc-api/wrangler.jsonc`. Keep staging data and uploads isolated from production. Deploy staging with `npx wrangler deploy --env staging`; production deploys require separate owner approval.
 - **Old account:** holds the `nakedcompound.in` DNS zone (nameservers osmar/bristol.ns.cloudflare.com) and the `brands.nakedcompound.in` Pages project. The website itself is on Vercel. **Codex must not touch this account.**
 
 **Domain decision (owner, 15 Nov 2026):** the `nakedcompound.in` zone stays in the existing website account, the main site stays on Vercel, and `brands.nakedcompound.in` stays on Cloudflare Pages. This app repository does not configure or change the website or its DNS.
