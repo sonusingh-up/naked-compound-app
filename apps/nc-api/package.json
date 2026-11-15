@@ -1,0 +1,25 @@
+{
+  "name": "@nakedcompound/nc-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24 <25" },
+  "scripts": {
+    "dev": "wrangler dev --local",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "seed:local": "node scripts/seed-from-products.mjs && wrangler d1 execute nc-app --local --file=.local-seed.sql",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "hono": "4.13.18",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261115.1",
+    "@types/node": "24.19.2",
+    "typescript": "7.0.2",
+    "vitest": "5.1.0",
+    "wrangler": "4.162.0"
+  }
+}

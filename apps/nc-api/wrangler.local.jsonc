@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "nc-api",
+  "account_id": "7353a845036995b406e2f7e9a5c99dba",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-15",
+  "observability": { "enabled": false },
+  "ratelimits": [
+    { "name": "ASK_LIMITER", "namespace_id": "10952026", "simple": { "limit": 20, "period": 60 } },
+    { "name": "USER_LIMITER", "namespace_id": "10952027", "simple": { "limit": 120, "period": 60 } }
+  ],
+  "d1_databases": [
+    { "binding": "DB", "database_name": "nc-app", "database_id": "7d55e074-0515-4303-9235-eb38e066dd33", "preview_database_id": "local" }
+  ],
+  "r2_buckets": [
+    { "binding": "IMAGES", "bucket_name": "nc-images" }
+  ]
+}

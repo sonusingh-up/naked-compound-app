@@ -1,0 +1,11 @@
+{
+  "name": "@nakedcompound/nc-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24 <25" },
+  "scripts": {
+    "dev": "node ../nc-api/node_modules/wrangler/bin/wrangler.js pages dev ./public -c wrangler.jsonc -c ../nc-api/wrangler.local.jsonc",
+    "typecheck": "node ../nc-api/node_modules/typescript/bin/tsc --noEmit"
+  }
+}

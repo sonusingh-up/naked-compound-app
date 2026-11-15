@@ -1,0 +1,149 @@
+<!doctype html>
+<!-- Source for /guides/img/high-protein-vegetarian-foods-infographic.webp (1600x1150).
+     Render: node scripts/render-illustration.mjs design/veg-protein-foods-infographic.html project/guides/img/high-protein-vegetarian-foods-infographic.webp 1600 1150
+     Protein values: IFCT 2017 (ICMR-NIN) per 100 g raw, scaled to the serving shown; milk 3.3 g/100 g (IFCT);
+     dahi 4.0 g/100 g (Amul label); soya chunks 52 g/100 g (Nutrela label); whey ~24 g per scoop (typical label). -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#fff;}
+  svg{display:block;}
+  .h1{font:800 64px 'Inter Tight',sans-serif;letter-spacing:.01em;fill:#fff;}
+  .h2{font:700 34px 'Inter Tight',sans-serif;letter-spacing:.06em;fill:#fff;}
+  .name{font:800 25px 'Inter Tight',sans-serif;letter-spacing:.04em;fill:#1f3346;}
+  .val{font:600 21px 'JetBrains Mono',monospace;fill:#b4532f;}
+  .val2{font:600 21px 'JetBrains Mono',monospace;fill:#1f6b5e;}
+  .foot{font:500 17px 'JetBrains Mono',monospace;fill:#5d6b78;letter-spacing:.02em;}
+</style>
+</head>
+<body>
+<svg id="art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1150" width="1600" height="1150">
+  <rect width="1600" height="1150" fill="#fff"/>
+  <!-- panel backgrounds -->
+  <rect x="0" y="0" width="798" height="1150" fill="#fbf7f1"/>
+  <rect x="802" y="0" width="798" height="1150" fill="#f3f8f6"/>
+  <rect x="798" y="0" width="4" height="1090" fill="#dfe7ec"/>
+  <!-- header bands -->
+  <rect x="0" y="0" width="798" height="170" fill="#c96442"/>
+  <rect x="802" y="0" width="798" height="170" fill="#2f7d74"/>
+  <text x="399" y="84" text-anchor="middle" class="h1">VEG PROTEIN</text>
+  <text x="399" y="134" text-anchor="middle" class="h2">EVERYDAY STAPLES</text>
+  <text x="1201" y="84" text-anchor="middle" class="h1">VEG PROTEIN</text>
+  <text x="1201" y="134" text-anchor="middle" class="h2">EASY ADD-ONS</text>
+  <g id="cells"></g>
+  <rect x="0" y="1090" width="1600" height="60" fill="#ffffff"/><rect x="0" y="1090" width="1600" height="2" fill="#dfe7ec"/>
+  <text x="800" y="1128" text-anchor="middle" class="foot">Protein per serving · IFCT 2017 (ICMR-NIN) and pack labels · nakedcompound.in</text>
+</svg>
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, a, p) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
+const txt = (x, y, cls, s, p) => { const t = el('text', { x, y, 'text-anchor': 'middle', class: cls }, p); t.textContent = s; return t; };
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const cells = document.getElementById('cells');
+
+// Bowl with a heap of small items: draws the heap inside the rim, then the bowl body in front.
+function bowl(g, color, rimColor, item) {
+  el('ellipse', { cx: 0, cy: 8, rx: 96, ry: 26, fill: rimColor }, g);
+  const id = 'clip' + Math.round(rnd() * 1e9);
+  const cp = el('clipPath', { id }, g); el('path', { d: 'M-94 10 Q-90 -52 0 -60 Q90 -52 94 10 Q0 36 -94 10 Z' }, cp);
+  const heap = el('g', { 'clip-path': `url(#${id})` }, g);
+  for (let i = 0; i < 70; i++) {
+    const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd());
+    const x = Math.cos(a) * r * 84, y = 6 + Math.sin(a) * r * 20 - (1 - r) * 26;
+    item(heap, x, y, i);
+  }
+  el('path', { d: 'M-100 10 Q-96 92 0 98 Q96 92 100 10 Q0 44 -100 10 Z', fill: color }, g);
+  el('path', { d: 'M-100 10 Q0 44 100 10', fill: 'none', stroke: 'rgba(255,255,255,.55)', 'stroke-width': 4 }, g);
+  el('ellipse', { cx: 0, cy: 104, rx: 54, ry: 8, fill: 'rgba(0,0,0,.08)' }, g);
+}
+const grain = (fill, rx, ry) => (p, x, y, i) => el('ellipse', { cx: x, cy: y, rx, ry, fill: i % 4 === 0 ? shade(fill) : fill, transform: `rotate(${rnd() * 180} ${x} ${y})` }, p);
+const shade = c => ({ '#f2c14e': '#e3ab2f', '#c9d96b': '#b1c450', '#ef8a3c': '#d9722a', '#9a5a2c': '#7d4520' }[c] || c);
+
+const ICONS = {
+  paneer(g) {
+    for (const [x, y] of [[-58, 30], [22, 30], [-18, -26]]) {
+      el('path', { d: `M${x} ${y} l40 -18 l40 18 l-40 18 z`, fill: '#fffaf0', stroke: '#e6dcc8', 'stroke-width': 2 }, g);
+      el('path', { d: `M${x} ${y} v56 l40 18 v-56 z`, fill: '#f6edd9', stroke: '#e6dcc8', 'stroke-width': 2 }, g);
+      el('path', { d: `M${x + 80} ${y} v56 l-40 18 v-56 z`, fill: '#eadfc6', stroke: '#e6dcc8', 'stroke-width': 2 }, g);
+    }
+  },
+  soya(g) { bowl(g, '#f0e2c8', '#e3cfa8', (p, x, y) => { el('path', { d: `M${x - 13} ${y} q4 -12 13 -11 q12 -2 13 9 q2 11 -12 12 q-14 2 -14 -10 z`, fill: '#b9844e', stroke: '#9a6a3a', 'stroke-width': 1.5 }, p); }); },
+  chana(g) { bowl(g, '#2f7d74', '#26655e', grain('#f2c14e', 7, 5)); },
+  moong(g) { bowl(g, '#c96442', '#a9502f', grain('#c9d96b', 7, 5)); },
+  masoor(g) { bowl(g, '#2b3a4a', '#1f2b37', grain('#ef8a3c', 6, 4.5)); },
+  rajma(g) {
+    el('ellipse', { cx: 0, cy: 40, rx: 112, ry: 34, fill: '#e9eef2' }, g);
+    el('ellipse', { cx: 0, cy: 34, rx: 112, ry: 34, fill: '#ffffff', stroke: '#d9e1e7', 'stroke-width': 2 }, g);
+    for (let i = 0; i < 16; i++) { const x = -78 + (i % 6) * 31 + rnd() * 8, y = 10 + Math.floor(i / 6) * 20 + rnd() * 6;
+      el('path', { d: `M${x - 16} ${y} c0 -12 14 -12 16 -4 c2 -8 16 -8 16 4 c0 12 -32 12 -32 0 z`, fill: '#8e1f2b', transform: `rotate(${rnd() * 60 - 30} ${x} ${y})` }, g);
+      el('ellipse', { cx: x - 5, cy: y - 3, rx: 5, ry: 2.5, fill: '#c2414e', opacity: .7 }, g); }
+  },
+  peanuts(g) {
+    const shell = (x, y, r) => { const s = el('g', { transform: `translate(${x} ${y}) rotate(${r})` }, g);
+      el('path', { d: 'M-46 0 c0 -26 30 -30 40 -14 c10 -14 52 -10 52 14 c0 24 -42 28 -52 12 c-10 16 -40 12 -40 -12 z', fill: '#d9a66a', stroke: '#b98146', 'stroke-width': 2.5 }, s);
+      for (const dx of [-30, -16, 14, 30]) el('line', { x1: dx, y1: -12, x2: dx, y2: 12, stroke: '#c18d52', 'stroke-width': 2 }, s); };
+    shell(-34, -10, -12); shell(40, 34, 18);
+    for (const [x, y] of [[-48, 50], [-20, 62], [8, 70]]) { el('ellipse', { cx: x, cy: y, rx: 14, ry: 10, fill: '#e8b98a', stroke: '#c48c58', 'stroke-width': 1.5 }, g); el('line', { x1: x, y1: y - 9, x2: x, y2: y + 9, stroke: '#c48c58', 'stroke-width': 1.5 }, g); }
+  },
+  milk(g) {
+    el('path', { d: 'M-70 -70 h44 v26 q22 20 22 46 v96 a10 10 0 0 1 -10 10 h-68 a10 10 0 0 1 -10 -10 v-96 q0 -26 22 -46 z', fill: '#eaf3f8', stroke: '#b9cfdb', 'stroke-width': 3 }, g);
+    el('rect', { x: -72, y: -82, width: 48, height: 16, rx: 3, fill: '#2f7d74' }, g);
+    el('path', { d: 'M-102 20 v76 a10 10 0 0 0 10 10 h68 a10 10 0 0 0 10 -10 v-76 z', fill: '#fdfdfb' }, g);
+    el('path', { d: 'M18 -6 h78 l-8 108 a10 10 0 0 1 -10 9 h-42 a10 10 0 0 1 -10 -9 z', fill: '#eaf3f8', stroke: '#b9cfdb', 'stroke-width': 3 }, g);
+    el('path', { d: 'M24 26 h66 l-5 76 a8 8 0 0 1 -8 7 h-40 a8 8 0 0 1 -8 -7 z', fill: '#fdfdfb' }, g);
+  },
+  dahi(g) {
+    el('path', { d: 'M-92 -6 h184 l-22 96 a14 14 0 0 1 -14 11 h-112 a14 14 0 0 1 -14 -11 z', fill: '#b5643e' }, g);
+    el('path', { d: 'M-92 -6 h184 l-4 18 h-176 z', fill: '#9b5230' }, g);
+    el('ellipse', { cx: 0, cy: -6, rx: 92, ry: 20, fill: '#fffdf7', stroke: '#9b5230', 'stroke-width': 4 }, g);
+    el('path', { d: 'M-40 -10 q20 -10 40 0 q20 10 40 0', fill: 'none', stroke: '#efe7d6', 'stroke-width': 4, 'stroke-linecap': 'round' }, g);
+    el('ellipse', { cx: 0, cy: 108, rx: 60, ry: 8, fill: 'rgba(0,0,0,.08)' }, g);
+  },
+  whey(g) {
+    el('rect', { x: -84, y: -54, width: 120, height: 158, rx: 16, fill: '#2b3a4a' }, g);
+    el('rect', { x: -92, y: -72, width: 136, height: 30, rx: 9, fill: '#1f2b37' }, g);
+    el('rect', { x: -84, y: -6, width: 120, height: 62, fill: '#c96442' }, g);
+    txt(-24, 34, 'name', 'WHEY', g).setAttribute('style', 'fill:#fff;font-size:22px');
+    el('path', { d: 'M40 70 a30 22 0 0 0 60 0 z', fill: '#e9eef2', stroke: '#b9cfdb', 'stroke-width': 3 }, g);
+    el('rect', { x: 92, y: 40, width: 14, height: 40, rx: 6, fill: '#b9cfdb', transform: 'rotate(35 99 60)' }, g);
+    el('ellipse', { cx: 70, cy: 68, rx: 26, ry: 7, fill: '#f6efe2' }, g);
+  },
+  soybean(g) {
+    el('path', { d: 'M-96 -20 q40 -60 120 -20 q30 16 0 40 q-80 50 -120 -20 z', fill: '#8fb35a', stroke: '#6f9440', 'stroke-width': 3 }, g);
+    for (const x of [-56, -18, 18]) el('ellipse', { cx: x, cy: -14, rx: 16, ry: 13, fill: '#a9c873' }, g);
+    for (const [x, y] of [[-60, 54], [-26, 64], [8, 56], [42, 66], [74, 50], [-8, 86], [30, 90]]) { el('circle', { cx: x, cy: y, r: 15, fill: '#ecd9a8', stroke: '#d4bc84', 'stroke-width': 2 }, g); el('ellipse', { cx: x + 4, cy: y - 4, rx: 4, ry: 2, fill: '#b99c5c' }, g); }
+  },
+  almonds(g) {
+    for (const [x, y, r] of [[-56, 0, -30], [-10, -20, 10], [40, 4, 40], [-30, 52, 70], [26, 60, -20], [70, 52, 15]]) {
+      const s = el('g', { transform: `translate(${x} ${y}) rotate(${r})` }, g);
+      el('path', { d: 'M0 -34 c22 10 26 50 0 58 c-26 -8 -22 -48 0 -58 z', fill: '#b8733e', stroke: '#93582b', 'stroke-width': 2 }, s);
+      for (const dy of [-16, -4, 8]) el('path', { d: `M-8 ${dy} q8 3 16 0`, fill: 'none', stroke: '#9b5e2f', 'stroke-width': 1.5 }, s);
+    }
+  },
+};
+
+const LEFT = [
+  ['paneer', 'PANEER', '19 g · 100 g'], ['soya', 'SOYA CHUNKS', '26 g · 50 g dry'], ['chana', 'CHANA DAL', '11 g · 50 g dry'],
+  ['rajma', 'RAJMA', '10 g · 50 g dry'], ['moong', 'MOONG DAL', '12 g · 50 g dry'], ['peanuts', 'PEANUTS', '7 g · 30 g'],
+];
+const RIGHT = [
+  ['milk', 'MILK', '8 g · 250 ml'], ['dahi', 'DAHI (CURD)', '8 g · 200 g'], ['whey', 'WHEY PROTEIN', '~24 g · 1 scoop'],
+  ['soybean', 'SOYABEAN', '18 g · 50 g dry'], ['masoor', 'MASOOR DAL', '12 g · 50 g dry'], ['almonds', 'ALMONDS', '6 g · 30 g'],
+];
+function panel(list, x0, cls) {
+  list.forEach(([icon, name, val], i) => {
+    const col = i % 3, row = Math.floor(i / 3);
+    const cx = x0 + 133 + col * 266, cy = 340 + row * 450;
+    const g = el('g', { transform: `translate(${cx} ${cy})` }, cells);
+    ICONS[icon](g);
+    txt(cx, cy + 200, 'name', name, cells);
+    txt(cx, cy + 236, cls, val, cells);
+  });
+}
+panel(LEFT, 0, 'val');
+panel(RIGHT, 802, 'val2');
+</script>
+</body>
+</html>

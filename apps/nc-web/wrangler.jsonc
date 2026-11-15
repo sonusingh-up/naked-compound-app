@@ -1,0 +1,10 @@
+{
+  "$schema": "../nc-api/node_modules/wrangler/config-schema.json",
+  "name": "nc-app",
+  "account_id": "7353a845036995b406e2f7e9a5c99dba",
+  "pages_build_output_dir": "./public",
+  "compatibility_date": "2026-11-15",
+  "services": [
+    { "binding": "API", "service": "nc-api" }
+  ]
+}

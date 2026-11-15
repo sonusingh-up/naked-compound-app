@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "calculate": [
+    { "name": "adult 60 kg", "value": "60", "unit": "kg", "category": "adult", "low": 49.8, "high": 49.8, "kg": 60 },
+    { "name": "older adult 60 kg", "value": "60", "unit": "kg", "category": "older", "low": 60, "high": 72, "kg": 60 },
+    { "name": "active 84 kg", "value": "84", "unit": "kg", "category": "active", "low": 117.6, "high": 168, "kg": 84 },
+    { "name": "resistance training 60 kg", "value": "60", "unit": "kg", "category": "muscle", "low": 96, "high": 132, "kg": 60 },
+    { "name": "pounds conversion", "value": "132.2772", "unit": "lb", "category": "adult", "low": 49.8, "high": 49.8, "kg": 60 }
+  ],
+  "chooseTarget": [
+    { "name": "selected at lower bound", "guidance": { "low": 84, "high": 120 }, "grams": 84, "mode": "selected", "valid": true },
+    { "name": "selected at upper bound", "guidance": { "low": 84, "high": 120 }, "grams": 120, "mode": "selected", "valid": true },
+    { "name": "manual target", "guidance": null, "grams": 75, "mode": "manual", "valid": true },
+    { "name": "target-free", "guidance": null, "grams": null, "mode": "none", "valid": true },
+    { "name": "selected above range", "guidance": { "low": 84, "high": 120 }, "grams": 121, "mode": "selected", "valid": false },
+    { "name": "target-free with target", "guidance": null, "grams": 60, "mode": "none", "valid": false },
+    { "name": "manual over input limit", "guidance": null, "grams": 1001, "mode": "manual", "valid": false }
+  ],
+  "contribution": [
+    { "name": "scaled portion", "protein": 12.5, "reference": 100, "grams": 40, "result": 5 },
+    { "name": "known zero", "protein": 0, "reference": 100, "grams": 100, "result": 0 },
+    { "name": "unknown protein", "protein": null, "reference": 100, "grams": 100, "result": null },
+    { "name": "zero reference rejected", "protein": 10, "reference": 0, "grams": 100, "throws": true }
+  ],
+  "intake": [
+    { "name": "known and unknown entries", "entries": [
+      { "food": { "protein": 10, "referenceGrams": 100 }, "grams": 50 },
+      { "food": { "protein": null, "referenceGrams": 100 }, "grams": 100 },
+      { "food": { "protein": 0, "referenceGrams": 100 }, "grams": 100 }
+    ], "grams": 5, "unknown": 1 },
+    { "name": "decimal precision", "entries": [
+      { "food": { "protein": 12.345, "referenceGrams": 100 }, "grams": 33.333 },
+      { "food": { "protein": 12.345, "referenceGrams": 100 }, "grams": 33.333 },
+      { "food": { "protein": 12.345, "referenceGrams": 100 }, "grams": 33.333 }
+    ], "grams": 12.34487655, "unknown": 0 }
+  ],
+  "progress": [
+    { "name": "partial", "total": 30, "target": 100, "remaining": 70, "fraction": 0.3 },
+    { "name": "over target capped", "total": 120, "target": 100, "remaining": 0, "fraction": 1 },
+    { "name": "no target", "total": 30, "target": null, "remaining": null, "fraction": 0 }
+  ],
+  "costPer25": [
+    { "name": "standard package", "price": 100, "packageGrams": 1000, "proteinPer100": 10, "result": 25 },
+    { "name": "free food", "price": 0, "packageGrams": 1000, "proteinPer100": 10, "result": 0 },
+    { "name": "unknown protein", "price": 100, "packageGrams": 1000, "proteinPer100": null, "result": null },
+    { "name": "zero protein", "price": 100, "packageGrams": 1000, "proteinPer100": 0, "result": null }
+  ],
+  "targetOnDate": [
+    { "name": "before first target", "events": [{ "date": "2026-11-01", "revision": 1, "grams": 60 }], "date": "2026-10-31", "result": null },
+    { "name": "latest prior target", "events": [{ "date": "2026-11-01", "revision": 1, "grams": 60 }, { "date": "2026-11-14", "revision": 2, "grams": 80 }], "date": "2026-11-10", "result": { "date": "2026-11-01", "revision": 1, "grams": 60 } },
+    { "name": "latest revision on same date", "events": [{ "date": "2026-11-14", "revision": 2, "grams": 80 }, { "date": "2026-11-14", "revision": 3, "grams": 90 }], "date": "2026-11-14", "result": { "date": "2026-11-14", "revision": 3, "grams": 90 } }
+  ]
+}
