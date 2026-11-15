@@ -2,7 +2,7 @@
 
 ## Product boundaries
 
-The shopping app is a native SwiftUI product with a Cloudflare Worker API and a Cloudflare Pages front. Protein rules remain in `packages/protein-core` and are shared with the future Swift port through `vectors.json`. Protein diary data is local-first and is never sent to the shopping API.
+The shopping app is a native SwiftUI product with a Cloudflare Worker API and a Netlify front. Protein rules remain in `packages/protein-core` and are shared with the future Swift port through `vectors.json`. Protein diary data is local-first and is never sent to the shopping API.
 
 The website repository is separate. Its catalog can be copied into this repository's `data/products.json` mirror with the root `sync-products` command; edits made here do not flow back to the website repository.
 

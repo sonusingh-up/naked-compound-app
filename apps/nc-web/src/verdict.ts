@@ -1,5 +1,5 @@
 type ApiService = { fetch(request: Request): Promise<Response> };
-type PagesContext = { request: Request; env: { API: ApiService }; params: { id?: string } };
+type VerdictContext = { request: Request; env: { API: ApiService }; params: { id?: string } };
 
 const escapeHtml = (value: unknown): string => String(value ?? '').replace(/[&<>"']/g, character => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -37,7 +37,7 @@ function priceText(value: unknown): string | null {
     : null;
 }
 
-export async function onRequestGet({ request, env, params }: PagesContext): Promise<Response> {
+export async function renderVerdict({ request, env, params }: VerdictContext): Promise<Response> {
   const id = params.id ?? '';
   if (!/^[A-Za-z0-9_-]{1,128}$/.test(id)) return shell('Review not found — Naked Compound', '<span class="status">Share link</span><h1 class="verdict-title">Review not found</h1><p class="verdict-summary">This link does not contain a valid product ID.</p>', undefined, 404);
   try {

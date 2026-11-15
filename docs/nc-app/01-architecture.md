@@ -5,7 +5,7 @@
 | Need | Choice | Free tier (verify before launch) | When you pay |
 |---|---|---|---|
 | API | Cloudflare Worker `nc-api` | 100k requests/day | Workers Paid $5/mo |
-| Web (`app.`) | Cloudflare Pages (`apps/nc-web`) | Static assets plus Pages Functions; API service binding | Cloudflare Workers plan as needed |
+| Web (`app.`) | Netlify (`apps/nc-web`) | Static assets plus Netlify Functions; HTTP API proxy | Netlify plan as needed |
 | Database | Cloudflare D1 | 5M rows read/day, 100k rows written/day, 5 GB. Queries fail when the limit is hit (enforced since 1 Sep 2026). | Same $5 plan |
 | Images | Cloudflare R2 | 10 GB, zero egress | Beyond 10 GB |
 | Semantic search | Cloudflare Vectorize | small free allowance | Scale |
@@ -25,15 +25,15 @@
   - Wrangler environment bindings are defined in `apps/nc-api/wrangler.jsonc`. Keep staging data and uploads isolated from production. Deploy staging with `npx wrangler deploy --env staging`; production deploys require separate owner approval.
   - Staging deployed 15 Nov 2026: `https://nc-api-staging.naked-business-735.workers.dev`, version `a410990d-01cd-4d6e-b950-1baf87f8c1ad`. Migrations `0001.sql` and `0002_api_accounts.sql` applied. D1 contains 616 scored catalog rows. `/v1/products` returns all 616 unique products with HTTP 200: 4 full reviews and 612 NC scores. Eligibility is based on non-null NC score; `has_review` controls article links only.
   - Staging Vectorize uses the `@cf/baai/bge-base-en-v1.5` preset matching the current retrieval implementation. The index is created but embeddings have not been populated by the SQL seed.
-  - `apps/nc-web/_redirects` contains staging API/image proxy rules for Netlify. Place it in the publish directory as part of a future Netlify build; this task did not deploy the web front.
+  - `apps/nc-web/public/_redirects` publishes staging API/image proxy rules on Netlify. Root `netlify.toml` declares the build, public assets and verdict function directory. Netlify project `nc-app` has ID `84d9c2c1-82fc-4fe2-a118-57dd1ee25171`; dev updates use Deploy Previews. Production promotion requires owner approval.
 - **Old account:** holds the `nakedcompound.in` DNS zone (nameservers osmar/bristol.ns.cloudflare.com) and the `brands.nakedcompound.in` Pages project. The website itself is on Vercel. **Codex must not touch this account.**
 
 **Domain decision (owner, 15 Nov 2026):** the `nakedcompound.in` zone stays in the existing website account, the main site stays on Vercel, and `brands.nakedcompound.in` stays on Cloudflare Pages. This app repository does not configure or change the website or its DNS.
 
-The app API uses its `workers.dev` host, and the web front uses Cloudflare Pages. Domain attachment and DNS are owner-managed and outside this repository's implementation scope.
+The app API uses its `workers.dev` host, and the web front uses Netlify. Domain attachment and DNS are owner-managed and outside this repository's implementation scope.
 
 - **Worker `nc-api` + D1 + R2 + Vectorize** stay in the new account. The API is reached at `https://nc-api.<subdomain>.workers.dev`. The iOS app calls this URL directly (base URL in `.xcconfig`); users never see it. Images are served by the Worker at `/img/*` from the R2 binding.
-- **`apps/nc-web` is a Cloudflare Pages project**. It serves the static app landing page and renders `/v/:id` shared verdicts with a Pages Function. A Pages service binding forwards `/v1/*` and `/img/*` requests to `nc-api` without a hard-coded Worker hostname.
+- **`apps/nc-web` is a Netlify project**. It serves the static app landing page and renders `/v/:id` shared verdicts with a Netlify Function. Published redirects forwards `/v1/*` and `/img/*` requests to `nc-api` using the staging Worker hostname.
 - No custom API hostname is configured in v1. The iOS app calls the Worker `workers.dev` URL directly.
 
 Custom-domain and DNS changes require separate owner setup and are not performed by this repository's local build or CI.
@@ -43,12 +43,12 @@ Custom-domain and DNS changes require separate owner setup and are not performed
 | Host | Serves |
 |---|---|
 | `www.nakedcompound.in` | Website (Vercel, unchanged). Also hosts `/.well-known/apple-app-site-association` so `/reviews/*` links open the app. |
-| `app.nakedcompound.in` | Cloudflare Pages front: landing page and `/v/:id` shared verdicts; Pages service binding forwards `/v1/*` and `/img/*` to the Worker |
+| `app.nakedcompound.in` | Netlify front: landing page and `/v/:id` shared verdicts; Netlify proxy forwards `/v1/*` and `/img/*` to the Worker |
 | `nc-api.<subdomain>.workers.dev` | Worker API (`/v1/*`, `/img/*`), used by the iOS app |
 | `clerk.nakedcompound.in` / `accounts.nakedcompound.in` | Clerk production CNAMEs |
 | `mail.nakedcompound.in` | Resend sending domain (SPF/DKIM/DMARC). Keeps root-domain email reputation separate. |
 
-See §1 for the app API and Pages service-binding arrangement.
+See §1 for the app API and Netlify proxy arrangement.
 
 ## 3. Repo layout
 
@@ -59,10 +59,11 @@ apps/
     ShareExtension/       Share-a-link target
     Packages/NCCore/      Swift package: models, API client, ProteinCore port
   nc-api/                 Worker (already built by Codex)
-  nc-web/                 Cloudflare Pages front: static assets + Pages Functions
-    functions/            API proxy and shared-verdict renderer
+  nc-web/                 Netlify front: static assets + Netlify Functions
+    netlify/functions/    Netlify shared-verdict handler
+    src/                  Platform-independent verdict renderer
     public/                Landing page assets
-    wrangler.jsonc
+    public/_redirects     Staging API and image proxies
   ../data/products.json  local mirror of the reviewed catalog export
   packages/protein-core/  protein rules and shared test vectors
 packages/protein-core/vectors.json   shared test vectors (TS + Swift)

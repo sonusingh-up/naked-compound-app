@@ -29,7 +29,7 @@ This repository contains the Naked Compound app API, app web front, design refer
 - iOS (future): SwiftUI, iOS 17+, Swift 6, SwiftData, VisionKit barcode scanning, and a Share Extension. No third-party UI kits.
 - Auth: Clerk with Sign in with Apple and email OTP. Guest mode works without an account.
 - API: Cloudflare Worker `nc-api` in `apps/nc-api`, with D1 `nc-app`, R2 `nc-images`, Vectorize `nc-reviews`, and Workers AI.
-- Web front: `apps/nc-web`, Cloudflare Pages with a service binding to the API Worker.
+- Web front: `apps/nc-web`, Netlify with HTTP proxies to the API Worker.
 - Product catalog: `data/products.json`, a local mirror refreshed explicitly with `npm run sync-products -- <path>`. Never edit reviewed product records in app code.
 - Protein logic: `packages/protein-core`; shared vectors live in `packages/protein-core/vectors.json`.
 - AI: provider interface in `apps/nc-api/src/ai`. Do not send diary data to the shopping API or AI.

@@ -8,9 +8,9 @@ Work one phase per Codex task. Each phase lists the prompt to paste into Codex a
 - [ ] Apple Developer Program ($99/yr). Reserve bundle ID (proposal: `in.nakedcompound.app`; owner confirms).
 - [x] D1 `nc-app` created in the naked.business account (`7d55e074-0515-4303-9235-eb38e066dd33`).
 - [x] R2 enabled, bucket `nc-images` created.
-- [ ] Configure the app front's Cloudflare Pages project from `apps/nc-web` and any custom domain through owner-managed DNS. Do not modify the separate website repository or its DNS from this repository.
+- [ ] Configure the app front's Netlify project from `apps/nc-web` and any custom domain through owner-managed DNS. Do not modify the separate website repository or its DNS from this repository.
 - [ ] Create an API token scoped to the naked.business account only (Workers, D1, R2, Vectorize edit), for Codex/CI.
-- [x] App front uses Cloudflare Pages; API uses a Cloudflare Worker service binding.
+- [x] App front uses Netlify; API runs on Cloudflare Workers.
 - [ ] Google AI Studio: create a project used only for NC, get an API key, note which Flash and embedding models show "Free of charge", and check the rate limits page.
 - [ ] Clerk app (production instance on `clerk.nakedcompound.in`), enable Apple + email OTP.
 - [ ] Resend: verify `mail.nakedcompound.in`.
@@ -36,11 +36,11 @@ Clerk JWT verification middleware, `/v1/me/*`, Clerk webhook (Svix verify), Rese
 
 Accept when: cross-user access tests fail closed, webhook signature tests pass, and deletion is idempotent and leaves no rows.
 
-## Phase 3b: web front (`apps/nc-web`, Cloudflare Pages)
+## Phase 3b: web front (`apps/nc-web`, Netlify)
 
-**Implementation:** `apps/nc-web` serves a static landing page and renders `/v/:id` with a Pages Function. Its Pages service binding forwards `/v1/*` and `/img/*` to the Worker. The public asset `_headers` sets a self-only CSP; the shared-verdict response sets its own CSP and security headers. No external Worker hostname is needed in the Pages proxy.
+**Implementation:** `apps/nc-web` serves a static landing page and renders `/v/:id` with a Netlify Function. Its published redirects forward `/v1/*` and `/img/*` to the Worker. The public asset `_headers` sets a self-only CSP; the shared-verdict response sets its own CSP and security headers. The staging Worker hostname is explicit in the published redirects and verdict function.
 
-Accept when: Wrangler Pages local development serves the front, `/v1/products` and `/img/*` reach the Worker service binding, shared verdicts display reviewed/unreviewed/error states safely, and the CSP blocks third-party requests. AASA configuration requires the final Apple Team ID and bundle ID; do not publish placeholder identifiers. No DNS changes or deployment in this phase.
+Accept when: Netlify Dev serves the front, `/v1/products` and `/img/*` reach the Worker HTTP endpoint, shared verdicts display reviewed/unreviewed/error states safely, and the CSP blocks third-party requests. AASA configuration requires the final Apple Team ID and bundle ID; do not publish placeholder identifiers. No DNS changes or deployment in this phase.
 
 ## Phase 4: iOS shell + design system
 
@@ -62,7 +62,7 @@ Accept when: XCTest passes the same vectors as Vitest, and day snapshots stay im
 
 ## Phase 7: release
 
-Privacy policy update (app data, Clerk, Resend, AI provider, affiliate links). App Privacy labels. Account deletion in-app. TestFlight with 20 testers. App Store screenshots. Then deploy `nc-api` (`wrangler deploy`) with owner approval, confirm the Pages deployment of `app.nakedcompound.in`, and configure universal links with the verified Apple identifiers.
+Privacy policy update (app data, Clerk, Resend, AI provider, affiliate links). App Privacy labels. Account deletion in-app. TestFlight with 20 testers. App Store screenshots. Then deploy `nc-api` (`wrangler deploy`) with owner approval, confirm the Netlify deployment of `app.nakedcompound.in`, and configure universal links with the verified Apple identifiers.
 
 ## Ongoing (owner, weekly)
 

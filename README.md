@@ -13,13 +13,13 @@ Standalone repository for the Naked Compound app API, web front, design referenc
 # Refresh this repository's catalog mirror from a supplied website-repo export
 npm run sync-products -- D:\path\to\website-repo\project\data\products.json
 
-# Run all API and Pages-front tests
+# Run all API and Netlify-front tests
 cd apps/nc-api
 npm ci
 npm test
 npm run typecheck
 
-# Run the Pages front locally with the API service binding
+# Run the Netlify front locally with the staging API
 cd ../nc-web
 npm run typecheck
 npm run dev

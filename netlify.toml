@@ -1,0 +1,16 @@
+[build]
+  base = "."
+  command = "npm run build --prefix apps/nc-web"
+  publish = "apps/nc-web/public"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+[functions]
+  directory = "apps/nc-web/netlify/functions"
+  node_bundler = "esbuild"
+
+[dev]
+  framework = "#static"
+  publish = "apps/nc-web/public"
+  port = 8888
