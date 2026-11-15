@@ -23,6 +23,9 @@
   - **Production (unchanged):** Worker `nc-api`; D1 `nc-app`, `database_id = 7d55e074-0515-4303-9235-eb38e066dd33`; R2 bucket `nc-images`; Vectorize index `nc-reviews`.
   - **Staging:** Worker `nc-api-staging`; D1 `nc-app-staging`, `database_id = 7d655f11-e7a8-4b5e-8e30-d209d1987664`; R2 bucket `nc-images-staging`; Vectorize index `nc-reviews-staging`.
   - Wrangler environment bindings are defined in `apps/nc-api/wrangler.jsonc`. Keep staging data and uploads isolated from production. Deploy staging with `npx wrangler deploy --env staging`; production deploys require separate owner approval.
+  - Staging deployed 15 Nov 2026: `https://nc-api-staging.naked-business-735.workers.dev`, version `e394a3ba-eff3-48c7-a2b5-f6c801a8fbc4`. Migrations `0001.sql` and `0002_api_accounts.sql` applied. D1 contains 616 catalog rows; only 4 meet the existing reviewed-product filter, and `/v1/products` returns those 4 with HTTP 200. Unreviewed entries were not promoted to reviewed status.
+  - Staging Vectorize uses the `@cf/baai/bge-base-en-v1.5` preset matching the current retrieval implementation. The index is created but embeddings have not been populated by the SQL seed.
+  - `apps/nc-web/_redirects` contains staging API/image proxy rules for Netlify. Place it in the publish directory as part of a future Netlify build; this task did not deploy the web front.
 - **Old account:** holds the `nakedcompound.in` DNS zone (nameservers osmar/bristol.ns.cloudflare.com) and the `brands.nakedcompound.in` Pages project. The website itself is on Vercel. **Codex must not touch this account.**
 
 **Domain decision (owner, 15 Nov 2026):** the `nakedcompound.in` zone stays in the existing website account, the main site stays on Vercel, and `brands.nakedcompound.in` stays on Cloudflare Pages. This app repository does not configure or change the website or its DNS.
