@@ -18,5 +18,25 @@
   ],
   "vectorize": [
     { "binding": "REVIEWS", "index_name": "nc-reviews" }
-  ]
+  ],
+  "env": {
+    "staging": {
+      "name": "nc-api-staging",
+      "account_id": "7353a845036995b406e2f7e9a5c99dba",
+      "ai": { "binding": "AI" },
+      "ratelimits": [
+        { "name": "ASK_LIMITER", "namespace_id": "10952028", "simple": { "limit": 20, "period": 60 } },
+        { "name": "USER_LIMITER", "namespace_id": "10952029", "simple": { "limit": 120, "period": 60 } }
+      ],
+      "d1_databases": [
+        { "binding": "DB", "database_name": "nc-app-staging", "database_id": "7d655f11-e7a8-4b5e-8e30-d209d1987664" }
+      ],
+      "r2_buckets": [
+        { "binding": "IMAGES", "bucket_name": "nc-images-staging" }
+      ],
+      "vectorize": [
+        { "binding": "REVIEWS", "index_name": "nc-reviews-staging" }
+      ]
+    }
+  }
 }
