@@ -43,5 +43,6 @@ const statements = parsed.products.map(product => {
   ];
   return `INSERT OR REPLACE INTO products (id, brand, name, score, grade, summary, form, price_inr, quantity, price_checked_at, categories, review_url, has_review, personally_tested, image_key, flags, cost_per_dose_inr, updated_at) VALUES (${row.map(sql).join(', ')});`;
 });
-await writeFile(output, `BEGIN TRANSACTION;\n${statements.join('\n')}\nCOMMIT;\n`, 'utf8');
+// Wrangler's D1 file importer manages atomicity; explicit SQL transactions are rejected remotely.
+await writeFile(output, `${statements.join('\n')}\n`, 'utf8');
 process.stdout.write(`Prepared ${statements.length} reviewed-catalog rows in ${output}. No price-check dates or product flags were inferred.\n`);
