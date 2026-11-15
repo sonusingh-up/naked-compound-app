@@ -113,7 +113,7 @@ async function betterPick(db: D1Database, product: ResolvableProduct) {
   let categories: string[] = [];
   try { const value: unknown = JSON.parse(product.categories); if (Array.isArray(value)) categories = value.filter((v): v is string => typeof v === 'string'); } catch { /* no category means no comparable alternative */ }
   if (!categories[0] || product.score === null || product.price_inr === null || typeof product.price_checked_at !== 'string') return null;
-  const row = await db.prepare(`SELECT * FROM products p WHERE p.id <> ? AND p.has_review = 1 AND p.score >= ? AND p.price_inr IS NOT NULL AND p.price_checked_at IS NOT NULL AND EXISTS (SELECT 1 FROM json_each(p.categories) WHERE lower(value) = lower(?)) AND ABS(p.price_inr - ?) <= ? ORDER BY p.score DESC, p.cost_per_dose_inr IS NULL ASC, p.cost_per_dose_inr ASC LIMIT 1`)
+  const row = await db.prepare(`SELECT * FROM products p WHERE p.id <> ? AND p.score >= ? AND p.price_inr IS NOT NULL AND p.price_checked_at IS NOT NULL AND EXISTS (SELECT 1 FROM json_each(p.categories) WHERE lower(value) = lower(?)) AND ABS(p.price_inr - ?) <= ? ORDER BY p.score DESC, p.cost_per_dose_inr IS NULL ASC, p.cost_per_dose_inr ASC LIMIT 1`)
     .bind(product.id, product.score + 0.5, categories[0], product.price_inr, product.price_inr * 0.3).first<ResolvableProduct>();
   return row ? mapProduct(row as never) : null;
 }
@@ -123,7 +123,7 @@ async function findProbable(db: D1Database, title: string | null): Promise<Resol
   const words = title.match(/[\p{L}\p{N}]+/gu)?.slice(0, 8) ?? [];
   if (!words.length) return null;
   const match = words.map(word => `"${word.replaceAll('"', '""')}"`).join(' OR ');
-  const rows = await db.prepare('SELECT p.*, bm25(products_fts) AS rank FROM products_fts JOIN products p ON p.rowid = products_fts.rowid WHERE products_fts MATCH ? AND p.has_review = 1 AND p.score IS NOT NULL ORDER BY rank ASC LIMIT 2').bind(match).all<ResolvableProduct & { rank: number }>();
+  const rows = await db.prepare('SELECT p.*, bm25(products_fts) AS rank FROM products_fts JOIN products p ON p.rowid = products_fts.rowid WHERE products_fts MATCH ? AND p.score IS NOT NULL ORDER BY rank ASC LIMIT 2').bind(match).all<ResolvableProduct & { rank: number }>();
   const first = rows.results[0];
   if (!first || first.rank > -3 || (rows.results[1] && rows.results[1].rank - first.rank < 1)) return null;
   return first;

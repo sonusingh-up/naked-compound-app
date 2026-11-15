@@ -3,6 +3,19 @@ import { onRequest as proxyRequest } from '../../nc-web/functions/[[path]]';
 import { onRequestGet as sharedVerdict } from '../../nc-web/functions/v/[id]';
 
 describe('Pages front and Worker service binding', () => {
+  it.each(['full', 'scored'])('shows the %s review label and gates the article link', async depth => {
+    const response = await sharedVerdict({
+      request: new Request('https://nc-app.pages.dev/v/p1'), params: { id: 'p1' },
+      env: { API: { fetch: async () => Response.json({ product: {
+        id: 'p1', name: 'Fixture', brand: 'Fixture brand', score: 8,
+        review_state: 'reviewed', review_depth: depth,
+        review_url: 'https://www.nakedcompound.in/reviews/fixture'
+      } }) } }
+    });
+    const html = await response.text();
+    expect(html).toContain(depth === 'full' ? 'Full review' : 'NC score');
+    expect(html.includes('Read the full review')).toBe(depth === 'full');
+  });
   it('forwards API and image requests unchanged through the API service binding', async () => {
     for (const path of ['/v1/products?q=whey', '/img/products/p1.png']) {
       const incoming = new Request(`https://nc-app.pages.dev${path}`, { headers: { authorization: 'Bearer session' } });

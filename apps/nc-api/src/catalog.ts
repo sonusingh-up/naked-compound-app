@@ -27,14 +27,15 @@ export function mapProduct(row: DbProduct) {
   let flags: Record<string, string | number | boolean | null> | null = null;
   try { const parsed: unknown = JSON.parse(row.categories); if (Array.isArray(parsed)) categories = parsed.filter((item): item is string => typeof item === 'string'); } catch { /* malformed catalog metadata stays absent */ }
   try { const parsed: unknown = row.flags ? JSON.parse(row.flags) : null; if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) flags = parsed as Record<string, string | number | boolean | null>; } catch { /* malformed catalog metadata stays absent */ }
-  const reviewed = row.has_review === 1 && row.score !== null;
+  const reviewed = row.score !== null;
   if (!reviewed) return { id: row.id, brand: row.brand, name: row.name, review_state: 'unreviewed' as const };
   return {
     id: row.id, brand: row.brand, name: row.name,
     review_state: 'reviewed' as const,
+    review_depth: row.has_review === 1 ? 'full' as const : 'scored' as const,
     score: row.score, grade: row.grade, summary: row.summary,
     form: row.form, price_inr: row.price_inr, price_checked_at: row.price_checked_at,
-    quantity: row.quantity, categories, review_url: row.review_url,
+    quantity: row.quantity, categories, review_url: row.has_review === 1 ? row.review_url : null,
     personally_tested: row.personally_tested === 1, flags,
     cost_per_dose_inr: row.cost_per_dose_inr
   };
@@ -50,7 +51,7 @@ export async function searchProducts(db: D1Database, params: URLSearchParams) {
   const parsed = searchParamsSchema.safeParse(raw);
   if (!parsed.success) return { error: 'invalid-query' as const };
   const input = parsed.data;
-  const clauses = ['p.has_review = 1', 'p.score IS NOT NULL'];
+  const clauses = ['p.score IS NOT NULL'];
   const values: unknown[] = [];
   if (input.q) {
     const match = ftsQuery(input.q);
@@ -64,7 +65,7 @@ export async function searchProducts(db: D1Database, params: URLSearchParams) {
     if (requestedFlags.some(flag => !flagPaths[flag])) return { error: 'invalid-query' as const };
     for (const flag of requestedFlags) { clauses.push(`json_extract(p.flags, '${flagPaths[flag]}') = 1`); }
   }
-  const rows = await db.prepare(`SELECT p.* FROM products p WHERE ${clauses.join(' AND ')} ORDER BY p.score DESC, p.cost_per_dose_inr IS NULL ASC, p.cost_per_dose_inr ASC, p.id ASC LIMIT 50`).bind(...values).all<DbProduct>();
+  const rows = await db.prepare(`SELECT p.* FROM products p WHERE ${clauses.join(' AND ')} ORDER BY p.score DESC, p.cost_per_dose_inr IS NULL ASC, p.cost_per_dose_inr ASC, p.id ASC`).bind(...values).all<DbProduct>();
   return { products: rows.results.map(mapProduct) };
 }
 
@@ -79,7 +80,7 @@ export async function getProduct(db: D1Database, id: string) {
   const primaryCategory = product.categories[0];
   let alternatives: ReturnType<typeof mapProduct>[] = [];
   if (primaryCategory) {
-    const altRows = await db.prepare(`SELECT * FROM products p WHERE p.id <> ? AND p.has_review = 1 AND p.score IS NOT NULL AND EXISTS (SELECT 1 FROM json_each(p.categories) WHERE lower(value) = lower(?)) AND p.score >= ? AND p.price_inr IS NOT NULL AND p.price_checked_at IS NOT NULL AND ? IS NOT NULL AND ? IS NOT NULL AND ABS(p.price_inr - ?) <= ? ORDER BY p.score DESC, p.cost_per_dose_inr IS NULL ASC, p.cost_per_dose_inr ASC, p.id ASC LIMIT 5`)
+    const altRows = await db.prepare(`SELECT * FROM products p WHERE p.id <> ? AND p.score IS NOT NULL AND EXISTS (SELECT 1 FROM json_each(p.categories) WHERE lower(value) = lower(?)) AND p.score >= ? AND p.price_inr IS NOT NULL AND p.price_checked_at IS NOT NULL AND ? IS NOT NULL AND ? IS NOT NULL AND ABS(p.price_inr - ?) <= ? ORDER BY p.score DESC, p.cost_per_dose_inr IS NULL ASC, p.cost_per_dose_inr ASC, p.id ASC LIMIT 5`)
       .bind(id, primaryCategory, (product.score ?? 0) + 0.5, product.price_inr, row.price_checked_at, product.price_inr, (product.price_inr ?? 0) * 0.3).all<DbProduct>();
     alternatives = altRows.results.map(mapProduct);
   }

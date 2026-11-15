@@ -58,6 +58,22 @@ function protectedEnv(db = new MockD1()) {
 const testVerifier = async (token: string) => token === 'valid' ? { userId: 'user_123' } : null;
 
 describe('v1 catalog and account routes', () => {
+  it.each([0, 8.2])('returns scored products without a full article, including score %s', async score => {
+    const db = new MockD1({ ...product, score, has_review: 0 });
+    const app = createApiApp(undefined, testVerifier);
+    for (const path of ['/v1/products', '/v1/products/p1']) {
+      const response = await app.request(path, {}, { ...protectedEnv(db), DB: db });
+      const body = await response.json() as any;
+      expect(body.product ?? body.products[0]).toMatchObject({ review_state: 'reviewed', review_depth: 'scored', score, review_url: null });
+    }
+    expect(db.calls[0].sql).not.toContain('LIMIT 50');
+  });
+
+  it('marks a scored product with an article as a full review', async () => {
+    const db = new MockD1();
+    const response = await createApiApp().request('/v1/products/p1', {}, { DB: db });
+    expect((await response.json() as any).product).toMatchObject({ review_depth: 'full', review_url: product.review_url });
+  });
   it('only returns reviewed products from search and orders by score then effective dose', async () => {
     const db = new MockD1();
     const app = createApiApp(undefined, testVerifier);
@@ -66,14 +82,14 @@ describe('v1 catalog and account routes', () => {
     const json = await response.json() as { products: Array<{ id: string; review_state: string; score: number }> };
     expect(json.products[0]).toMatchObject({ id: 'p1', review_state: 'reviewed', score: 8.2 });
     const sql = db.calls[0].sql;
-    expect(sql).toContain('p.has_review = 1');
+    expect(sql).not.toContain('p.has_review = 1');
     expect(sql).toContain('p.score IS NOT NULL');
     expect(sql).toContain('ORDER BY p.score DESC, p.cost_per_dose_inr');
     expect(db.calls[0].values).toContain('"whey"');
   });
 
   it('does not expose score, price, flags, or editorial claims for an unreviewed detail', async () => {
-    const unreviewed = { ...product, score: 9.9, grade: 'A+', summary: 'unapproved claim', price_inr: 1, has_review: 0, flags: '{"fssai_verified":true}' };
+    const unreviewed = { ...product, score: null, grade: 'A+', summary: 'unapproved claim', price_inr: 1, has_review: 0, flags: '{"fssai_verified":true}' };
     const app = createApiApp(undefined, testVerifier);
     const response = await app.request('/v1/products/unreviewed', {}, { ...protectedEnv(new MockD1(unreviewed)), DB: new MockD1(unreviewed) });
     const json = await response.json() as { product: Record<string, unknown> };

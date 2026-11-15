@@ -52,7 +52,7 @@ export async function onRequestGet({ request, env, params }: PagesContext): Prom
     if (!product || typeof product.name !== 'string') throw new Error('invalid-product');
     const reviewed = product.review_state === 'reviewed';
     const title = `${product.name} review — Naked Compound`;
-    const status = reviewed ? 'Naked Compound reviewed' : 'Not yet reviewed';
+    const status = reviewed ? (product.review_depth === 'full' ? 'Full review' : 'NC score') : 'Not yet reviewed';
     const pieces = [`<span class="status">${status}</span>`, `<h1 class="verdict-title">${escapeHtml(product.name)}</h1>`, `<p class="verdict-subtitle">${escapeHtml(product.brand)}</p>`];
     if (reviewed) {
       pieces.push(`<div class="score-row"><span class="score">${escapeHtml(product.score)}/10</span>${product.grade ? `<span class="grade">Grade ${escapeHtml(product.grade)}</span>` : ''}</div>`);
@@ -67,7 +67,7 @@ export async function onRequestGet({ request, env, params }: PagesContext): Prom
     } else {
       pieces.push('<p class="verdict-summary">Naked Compound has not reviewed this product yet. No score or verdict is available.</p>');
     }
-    if (typeof product.review_url === 'string' && product.review_url.startsWith('https://www.nakedcompound.in/')) {
+    if (reviewed && product.review_depth === 'full' && typeof product.review_url === 'string' && product.review_url.startsWith('https://www.nakedcompound.in/')) {
       pieces.push(`<a class="button" href="${escapeHtml(product.review_url)}">Read the full review</a>`);
     }
     if (reviewed && Array.isArray(data.listings)) {
@@ -79,7 +79,7 @@ export async function onRequestGet({ request, env, params }: PagesContext): Prom
       : 'Not yet reviewed by Naked Compound. No score or verdict is available.';
     const alternatives = Array.isArray(data.alternatives) ? data.alternatives.filter((item): item is Record<string, unknown> => !!item && typeof item === 'object' && typeof (item as { id?: unknown }).id === 'string' && typeof (item as { name?: unknown }).name === 'string') : [];
     if (alternatives.length) {
-      const altMarkup = `<section class="alternatives"><h2>Reviewed alternatives</h2>${alternatives.map(item => `<a class="alternative-link" href="/v/${encodeURIComponent(String(item.id))}"><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(item.brand)}${typeof item.score === 'number' ? ` · ${escapeHtml(item.score)}/10` : ''}</span></a>`).join('')}</section>`;
+      const altMarkup = `<section class="alternatives"><h2>Reviewed alternatives</h2>${alternatives.map(item => `<a class="alternative-link" href="/v/${encodeURIComponent(String(item.id))}"><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(item.brand)} · ${item.review_depth === 'full' ? 'Full review' : 'NC score'}${typeof item.score === 'number' ? ` · ${escapeHtml(item.score)}/10` : ''}</span></a>`).join('')}</section>`;
       pieces.push(altMarkup);
     }
     return htmlResponse(htmlShell(title, pieces.join(''), description));
